@@ -1,0 +1,235 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+
+		<title>
+			LayerList widget with actions | Sample | ArcGIS Maps SDK for JavaScript
+			4.25
+		</title>
+
+		<style>
+			html,
+			body,
+			#viewDiv {
+				padding: 0;
+				margin: 0;
+				height: 100%;
+				width: 100%;
+				overflow: hidden;
+			}
+		</style>
+
+		<link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css" />
+		<script src="https://js.arcgis.com/4.25/"></script>
+
+		<script>
+			require([
+				"esri/Map",
+				"esri/views/MapView",
+				"esri/layers/GroupLayer",
+				"esri/layers/MapImageLayer",
+				"esri/layers/FeatureLayer",
+				"esri/widgets/LayerList",
+				"esri/widgets/Slider",
+				"esri/widgets/Legend",
+				"esri/widgets/BasemapGallery",
+				"esri/widgets/Expand",
+				"esri/core/reactiveUtils",
+				"esri/widgets/CoordinateConversion",
+				"esri/layers/GeoJSONLayer",
+				"esri/widgets/Swipe",
+				"esri/widgets/LayerList/ListItemPanel"
+			], (Map, MapView, GroupLayer, MapImageLayer, FeatureLayer, LayerList, Slider, Legend, BasemapGallery,
+				Expand, reactiveUtils, CoordinateConversion, GeoJSONLayer, Swipe, ListItemPanel) => {
+				// ------------------------------------------一、显示地图图层---------------------------------------
+				const map = new Map({
+					basemap: "streets-vector",
+
+				});
+
+				// Add the map to a MapView
+				const view = new MapView({
+					center: [106.217, 34.8419],
+					zoom: 3,
+					container: "viewDiv",
+					map: map
+				});
+				// --------------------------------------------二、添加地图要素--------------------------------------
+				//1、全国shp矢量图geojsonlayer1
+				const geojsonlayer1 = new GeoJSONLayer({
+					url: "https://cxqttkl.github.io/web4gis15/china.geojson",
+					title: "全国边界矢量图",
+
+					popupTemplate: {
+						title: "NAME",
+						content: [{
+							// It is also possible to set the fieldInfos outside of the content
+							// directly in the popupTemplate. If no fieldInfos is specifically set
+							// in the content, it defaults to whatever may be set within the popupTemplate.
+							type: "fields",
+							fieldInfos: [{
+									fieldName: "PROV",
+									label: "所在省份"
+								},
+								{
+									fieldName: "Area_sqkm",
+									label: "面积",
+									format: {
+										digitSeparator: true,
+										places: 0
+									}
+								},
+								{
+									fieldName: "Shape_Leng",
+									label: "周长",
+									format: {
+										digitSeparator: true,
+										places: 0
+									}
+								},
+								{
+									fieldName: "pop2000",
+									label: "2000年人口"
+								},
+								{
+									fieldName: "pop2010",
+									label: "2010年人口",
+									format: {
+										digitSeparator: true,
+										places: 0
+									}
+								},
+								{
+									fieldName: "pct2000",
+									label: "pct2000年",
+									format: {
+										digitSeparator: true,
+										places: 0
+									}
+								},
+								{
+									fieldName: "pct2010",
+									label: "pct2010年",
+									format: {
+										digitSeparator: true,
+										places: 0
+									}
+								},
+								{
+									fieldName: "radius",
+									label: "半径",
+									format: {
+										digitSeparator: true,
+										places: 0
+									}
+								},
+
+							]
+						}]
+					},
+				});
+
+				map.add(geojsonlayer1)
+				reactiveUtils.watch(
+					() => geojsonlayer1.visible,
+					(visible) => {
+						if (visible) {
+							view.goTo({
+								target: [106.217, 34.8419],
+								zoom: 3
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+						};
+					});
+				view.whenLayerView(geojsonlayer1).then(function(layerView) {});
+				
+				const geojsonlayer2 = new GeoJSONLayer({
+					url: "https://tongmingdong.github.io/tongmingdong/blob/main/data/420100.json",
+					title: "武昌区",
+				});
+				map.add(geojsonlayer2)
+				
+				//----------------------------------三、添加坐标、比例尺显示-----------------------------------
+				//添加DIV用于显示坐标等信息
+				var coordsWidget = document.createElement("div");
+				coordsWidget.id = "coordsWidget";
+				coordsWidget.className = "esri-widget esri-component";
+				coordsWidget.style.padding = "7px 15px 5px";
+				view.ui.add(coordsWidget, "bottom-left");
+
+				//显示经纬度、比例尺大小和尺度
+				function showCoordinates(pt) {
+					var coords = "Lat/Lon " + pt.latitude.toFixed(3) + " " + pt.longitude.toFixed(3) +
+						" | Scale 1:" + Math.round(view.scale * 1) / 1;
+					coordsWidget.innerHTML = coords;
+				}
+				//添加事件显示中心的坐标（在视图停止移动之后）
+				view.watch(["stationary"], function() {
+					showCoordinates(view.center);
+				});
+
+				//添加显示鼠标的坐标点
+				view.on(["pointer-down", "pointer-move"], function(evt) {
+					showCoordinates(view.toMap({
+						x: evt.x,
+						y: evt.y
+					}));
+				});
+				//------------------------------------------四、提供坐标转换功能-------------------------------------
+				const ccWidget = new CoordinateConversion({
+					view: view,
+				});
+				view.ui.add(ccWidget, "top-right");
+
+				// Regular expression to find a number
+				const numberSearchPattern = /-?\d+[\.]?\d*/;
+				//--------------------------------------------五、显示layerlist--------------------------------------
+				const layerList = new LayerList({
+					view: view
+				});
+				const llExpand = new Expand({
+					view: view,
+					content: layerList,
+					expanded: false
+				});
+				view.ui.add(llExpand, "top-right")
+
+				//----------------------------------------------六、显示图例--------------------------------------
+				const rrExpand = new Expand({
+					view,
+					content: new Legend({
+						view
+					}),
+					expanded: false
+				});
+				view.ui.add(rrExpand, "bottom-right")
+
+				//---------------------------------七、显示BasemapGallery(小图标，菜单栏形式)-----------------------------------
+				const bgExpand = new Expand({
+					view,
+					content: new BasemapGallery({
+						view
+					}),
+				});
+				view.ui.add(bgExpand, "top-left");
+
+				//-----------------------------------八、create a new Swipe widget-------------------------------------
+				const swipe = new Swipe({
+					leadingLayers: [geojsonlayer1],
+					position: 35, // set position of widget to 35%
+					view: view
+				});
+
+				// add the widget to the view
+				view.ui.add(swipe);
+			});
+		</script>
+	</head>
+
+	<body>
+		<div id="viewDiv"></div>
+	</body>
+</html>
