@@ -169,7 +169,7 @@
 				const url7 = "data/肇庆_汽车相关.json";
 				const url8 = "data/肇庆_公司企业.json";
 				const url9 = "data/肇庆市.json";
-				
+
 				// const url1 = "https://tongmingdong.github.io/data/肇庆_餐饮美食.json";
 				// const url2 = "https://tongmingdong.github.io/data/肇庆_购物消费.json";
 				// const url3 = "https://tongmingdong.github.io/data/肇庆_交通设施.json";
@@ -306,7 +306,7 @@
 
 				const geojsonlayer1 = new GeoJSONLayer({
 					"url": url1,
-					title: "肇庆_餐饮美食",
+					title: "餐饮美食",
 					renderer: renderer1,
 					popupTemplate: template
 				});
@@ -324,14 +324,13 @@
 								easing: "ease-in-out",
 
 							});
-							alert("")
 						};
 					});
 				view.whenLayerView(geojsonlayer1).then(function(layerView) {});
 
 				const geojsonlayer2 = new GeoJSONLayer({
 					"url": url2,
-					title: "肇庆_购物消费",
+					title: "购物消费",
 					renderer: renderer2,
 					popupTemplate: template
 				});
@@ -354,7 +353,7 @@
 
 				const geojsonlayer3 = new GeoJSONLayer({
 					"url": url3,
-					title: "肇庆_交通设施",
+					title: "交通设施",
 					renderer: renderer3,
 					popupTemplate: template
 				});
@@ -376,7 +375,7 @@
 
 				const geojsonlayer4 = new GeoJSONLayer({
 					"url": url4,
-					title: "肇庆_科教文化",
+					title: "科教文化",
 					renderer: renderer4,
 					popupTemplate: template
 				});
@@ -398,7 +397,7 @@
 
 				const geojsonlayer5 = new GeoJSONLayer({
 					"url": url5,
-					title: "肇庆_休闲娱乐",
+					title: "休闲娱乐",
 					renderer: renderer5,
 					popupTemplate: template
 				});
@@ -421,7 +420,7 @@
 				//如果采用单一符号
 				//step1
 				const simpleMS = new SimpleMarkerSymbol({
-					color: new Color([255, 255, 191]),
+					color: "rgba(200, 118, 147, 1.0)",
 					size: 7,
 					style: "triangle",
 					outline: new SimpleLineSymbol({
@@ -438,10 +437,11 @@
 
 				const geojsonlayer6 = new GeoJSONLayer({
 					"url": url6,
-					title: "肇庆_医疗保健",
+					title: "医疗保健",
 					renderer: renderer6,
 					popupTemplate: template
 				});
+
 				map.add(geojsonlayer6)
 				reactiveUtils.watch(
 					() => geojsonlayer6.visible,
@@ -460,7 +460,7 @@
 
 				const geojsonlayer7 = new GeoJSONLayer({
 					"url": url7,
-					title: "肇庆_汽车相关",
+					title: "汽车相关",
 					renderer: renderer7,
 					popupTemplate: template
 				});
@@ -482,10 +482,11 @@
 
 				const geojsonlayer8 = new GeoJSONLayer({
 					"url": url8,
-					title: "肇庆_公司企业",
+					title: "公司企业",
 					renderer: renderer8,
 					popupTemplate: template
 				});
+
 				map.add(geojsonlayer8)
 				reactiveUtils.watch(
 					() => geojsonlayer8.visible,
@@ -567,6 +568,7 @@
 				// add the widget to the view
 				view.ui.add(swipe);
 
+				view.ui.add("optionsDiv", "top-right");
 				//--------------------------------------八、显示layerlist--------------------------------------
 				const layerList = new LayerList({
 					view: view,
@@ -578,9 +580,45 @@
 				});
 				// Add widget to the top right corner of the view
 				view.ui.add(llExpand, "top-right");
-
 				//-----------------------------------九、缓冲区查询——————以休闲娱乐为例--------------------------------------
 				//鼠标右键点击某个省后，以“该省多边形边界100km缓冲区”为几何查询条件查询地震图层，并高亮满足条件的地震点要素
+				// when query type changes, set appropriate values
+				const queryOpts = document.getElementById("query-type");
+				layer11 = geojsonlayer5;
+				queryOpts.addEventListener("change", () => {
+					console.log(queryOpts.value)
+					switch (queryOpts.value) {
+						// values set for distance query
+						case "geojsonlayer1":
+							layer11 = geojsonlayer1;
+							break;
+						case "geojsonlayer2":
+							layer11 = geojsonlayer2;
+							break;
+						case "geojsonlayer3":
+							layer11 = geojsonlayer3;
+							break;
+						case "geojsonlayer4":
+							layer11 = geojsonlayer4;
+							break;
+						case "geojsonlayer5":
+							layer11 = geojsonlayer5;
+							break;
+						case "geojsonlayer6":
+							layer11 = geojsonlayer6;
+							break;
+						case "geojsonlayer7":
+							layer11 = geojsonlayer7;
+							break;
+						case "geojsonlayer8":
+							layer11 = geojsonlayer8;
+							break;
+						default:
+							// Default set to basic query
+							layer11 = geojsonlayer5;
+					}
+				})
+
 				view.on("click", function(evt) {
 					view.graphics.removeAll();
 					if (evt.button != 2) return;
@@ -599,25 +637,41 @@
 
 							const bufferPoly = geometryEngine.geodesicBuffer(item.geometry, 1,
 								'kilometers');
+							var g = new Graphic({
+								geometry: bufferPoly, //item.geometry,
+								attributes: item.attributes,
+								symbol: {
+									type: "simple-fill",
+									color: [200, 100, 100, 0.3]
+									//size: 3,//item.attributes['magnitude'] * item.attributes['magnitude'],
+									//style: "square"
 
-							let query2 = geojsonlayer5.createQuery();
+								}
+							});
+							view.graphics.add(g);
+							const area = geometryEngine.geodesicArea(item.geometry,
+								"square-kilometers");
+
+
+
+							let query2 = layer11.createQuery();
 							query2.geometry = bufferPoly;
 
 							query2.spatialRelationship = "intersects"; // this is the default
 							query2.returnGeometry = true;
 							query2.outFields = ["*"];
 
-							geojsonlayer5.queryFeatureCount(query2).then(function(earthqua) {
+							layer11.queryFeatureCount(query2).then(function(earthqua) {
 								alert("Layer: " + earthqua)
 							});
-							geojsonlayer5.queryFeatures(query2).then(function(earthqua) {
+							layer11.queryFeatures(query2).then(function(earthqua) {
 								earthqua.features.forEach(function(eachEq) {
 									var g = new Graphic({
 										geometry: eachEq.geometry,
 										attributes: eachEq.attributes,
 										symbol: {
 											type: "simple-marker",
-											color: [10, 100, 100, 0.3]
+											color: [200, 0, 0, 0.3]
 										}
 									});
 
@@ -637,5 +691,21 @@
 
 	<body>
 		<div id="viewDiv"></div>
+		<div id="optionsDiv" class="esri-widget">
+			<p>
+				[具有查询功能]：<br> 鼠标右键点击肇庆市内某个县后，会以“该县多边形边界1km缓冲区”为几何查询条件查询[任意]图层，并高亮满足条件的[任意]的点数据。可以从以下的数据中选择。</br>
+			</p>
+			<select id="query-type" class="esri-widget">
+				<option value="geojsonlayer1">餐饮美食</option>
+				<option value="geojsonlayer2">购物消费</option>
+				<option value="geojsonlayer3">交通设施</option>
+				<option value="geojsonlayer4">科教文化</option>
+				<option value="geojsonlayer5">休闲娱乐</option>
+				<option value="geojsonlayer6">医疗保健</option>
+				<option value="geojsonlayer7">汽车相关</option>
+				<option value="geojsonlayer8">公司企业</option>
+			</select>
+		</div>
+
 	</body>
 </html>
