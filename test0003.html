@@ -54,7 +54,7 @@
 				"esri/symbols/SimpleLineSymbol",
 			], (Map, MapView, GroupLayer, MapImageLayer, FeatureLayer, LayerList, Slider, Legend, BasemapGallery,
 				Expand, reactiveUtils, CoordinateConversion, GeoJSONLayer, Swipe, ListItemPanel, SimpleRenderer,
-				geometryEngine, Graphic, SimpleMarkerSymbol,Color,SimpleLineSymbol) => {
+				geometryEngine, Graphic, SimpleMarkerSymbol, Color, SimpleLineSymbol) => {
 				// ------------------------------------------一、显示地图图层---------------------------------------
 				const map = new Map({
 					basemap: "streets-vector",
@@ -170,6 +170,16 @@
 				const url8 = "data/肇庆_公司企业.json";
 				const url9 = "data/肇庆市.json";
 				
+				// const url1 = "https://tongmingdong.github.io/data/肇庆_餐饮美食.json";
+				// const url2 = "https://tongmingdong.github.io/data/肇庆_购物消费.json";
+				// const url3 = "https://tongmingdong.github.io/data/肇庆_交通设施.json";
+				// const url4 = "https://tongmingdong.github.io/data/肇庆_科教文化.json";
+				// const url5 = "https://tongmingdong.github.io/data/肇庆_休闲娱乐.json";
+				// const url6 = "https://tongmingdong.github.io/data/肇庆_医疗保健.json";
+				// const url7 = "https://tongmingdong.github.io/data/肇庆_汽车相关.json";
+				// const url8 = "https://tongmingdong.github.io/data/肇庆_公司企业.json";
+				// const url9 = "https://tongmingdong.github.io/data/肇庆市.json";
+
 				const renderer1 = {
 					type: "simple",
 					symbol: {
@@ -266,7 +276,7 @@
 						}
 					}
 				};
-				
+
 				const geojsonlayer9 = new GeoJSONLayer({
 					"url": url9,
 					title: "肇庆市行政区",
@@ -280,7 +290,7 @@
 							alert(
 								"    肇庆，古称端州，位于广东省中西部，东部和东南部与佛山市接壤，西南与云浮市相连，西及西北与广西壮族自治区梧州市和贺州市交界，北部及东北部与清远市相邻。广东省地级市，截止2020年末肇庆市行政区域总面积148.91万公顷，下辖4个会市，设91个镇、12个街道、1个民族乡、1255个行政村和296个社区常住人口412.97万人（2021年）。肇庆历史悠久，文化底蕴深厚。春秋战国时期为百越地；秦始皇三十三年（公元前214）所设四会县是广东省4 个最早建制县之一；中华人民共和国成立后，肇庆一直是高要县、肇庆市人民政府和肇庆地区行政公署的驻地。1988年3月，肇庆改为省辖。\n    现在的肇庆市在各个行业的发展都十分迅速，有餐饮美食、交通设施、科教文化、休闲娱乐、医疗保健、购物消费以及汽车行业等等。"
 							);
-				
+
 							view.goTo({
 								target: [112.2479, 23.4552],
 								zoom: 8
@@ -288,12 +298,12 @@
 								duration: 2500,
 								easing: "ease-in-out"
 							});
-				
-				
+
+
 						};
 					});
 				view.whenLayerView(geojsonlayer9).then(function(layerView) {});
-				
+
 				const geojsonlayer1 = new GeoJSONLayer({
 					"url": url1,
 					title: "肇庆_餐饮美食",
@@ -407,21 +417,21 @@
 						};
 					});
 				view.whenLayerView(geojsonlayer5).then(function(layerView) {});
-				
+
 				//如果采用单一符号
 				//step1
 				const simpleMS = new SimpleMarkerSymbol({
-				    color: new Color([255, 255, 191]),
-				    size: 7,
-				    style: "triangle",
-				    outline: new SimpleLineSymbol({
-				        color:new Color([255, 255, 255]),
-				        width:0
-				    })
+					color: new Color([255, 255, 191]),
+					size: 7,
+					style: "triangle",
+					outline: new SimpleLineSymbol({
+						color: new Color([255, 255, 255]),
+						width: 0
+					})
 				});
 				//step2
 				const simpleR = new SimpleRenderer({
-				   symbol:simpleMS
+					symbol: simpleMS
 				});
 				//step3
 				geojsonlayer5.renderer = simpleR;
@@ -492,7 +502,7 @@
 					});
 				view.whenLayerView(geojsonlayer8).then(function(layerView) {});
 
-				
+
 				//----------------------------------三、添加坐标、比例尺显示-----------------------------------
 				//添加DIV用于显示坐标等信息
 				var coordsWidget = document.createElement("div");
