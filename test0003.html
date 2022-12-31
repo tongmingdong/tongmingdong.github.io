@@ -22,7 +22,7 @@
 				color: black;
 				padding: 6px;
 				max-width: 400px;
-				border-radius: 5px;
+				border-radius: 10px;
 			}
 		</style>
 
@@ -220,7 +220,7 @@
 					symbol: {
 						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
 						size: 6,
-						color: "y",
+						color: "rgba(85, 255, 0, 0.5)",
 						outline: { // autocasts as new SimpleLineSymbol()
 							width: 0.5,
 							color: "white"
@@ -255,6 +255,7 @@
 					type: "simple",
 					symbol: {
 						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+						style: "square",
 						size: 6,
 						color: "pink",
 						outline: { // autocasts as new SimpleLineSymbol()
@@ -275,6 +276,47 @@
 						}
 					}
 				};
+
+				const renderer9 = {
+					type: "simple", // autocasts as new SimpleRenderer()
+					symbol: {
+						type: "simple-fill", // autocasts as new SimpleFillSymbol()
+						color: "rgba(64, 158, 255, 0.5)",
+						outline: {
+							// makes the outlines of all features consistently light gray
+							color: "rgba(255, 255, 255, 1.0)",
+							width: 0.5
+						}
+					}
+				};
+
+				const geojsonlayer9 = new GeoJSONLayer({
+					"url": url9,
+					title: "肇庆市行政区",
+					renderer: renderer9,
+					popupTemplate: template1
+				});
+				map.add(geojsonlayer9)
+				reactiveUtils.watch(
+					() => geojsonlayer9.visible,
+					(visible) => {
+						if (visible) {
+							alert(
+								"    肇庆，古称端州，位于广东省中西部，东部和东南部与佛山市接壤，西南与云浮市相连，西及西北与广西壮族自治区梧州市和贺州市交界，北部及东北部与清远市相邻。广东省地级市，截止2020年末肇庆市行政区域总面积148.91万公顷，下辖4个会市，设91个镇、12个街道、1个民族乡、1255个行政村和296个社区常住人口412.97万人（2021年）。肇庆历史悠久，文化底蕴深厚。春秋战国时期为百越地；秦始皇三十三年（公元前214）所设四会县是广东省4 个最早建制县之一；中华人民共和国成立后，肇庆一直是高要县、肇庆市人民政府和肇庆地区行政公署的驻地。1988年3月，肇庆改为省辖。\n    现在的肇庆市在各个行业的发展都十分迅速，有餐饮美食、交通设施、科教文化、休闲娱乐、医疗保健、购物消费以及汽车行业等等。"
+							);
+
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+
+
+						};
+					});
+				view.whenLayerView(geojsonlayer9).then(function(layerView) {});
 
 				const geojsonlayer1 = new GeoJSONLayer({
 					"url": url1,
@@ -475,32 +517,7 @@
 					});
 				view.whenLayerView(geojsonlayer8).then(function(layerView) {});
 
-				const geojsonlayer9 = new GeoJSONLayer({
-					"url": url9,
-					title: "肇庆市行政区",
-					popupTemplate: template1
-				});
-				map.add(geojsonlayer9)
-				reactiveUtils.watch(
-					() => geojsonlayer9.visible,
-					(visible) => {
-						if (visible) {
-							alert(
-								"    肇庆，古称端州，位于广东省中西部，东部和东南部与佛山市接壤，西南与云浮市相连，西及西北与广西壮族自治区梧州市和贺州市交界，北部及东北部与清远市相邻。广东省地级市，截止2020年末肇庆市行政区域总面积148.91万公顷，下辖4个会市，设91个镇、12个街道、1个民族乡、1255个行政村和296个社区常住人口412.97万人（2021年）。肇庆历史悠久，文化底蕴深厚。春秋战国时期为百越地；秦始皇三十三年（公元前214）所设四会县是广东省4 个最早建制县之一；中华人民共和国成立后，肇庆一直是高要县、肇庆市人民政府和肇庆地区行政公署的驻地。1988年3月，肇庆改为省辖。\n    现在的肇庆市在各个行业的发展都十分迅速，有餐饮美食、交通设施、科教文化、休闲娱乐、医疗保健、购物消费以及汽车行业等等。"
-							);
-				
-							view.goTo({
-								target: [112.2479, 23.4552],
-								zoom: 8
-							}, {
-								duration: 2500,
-								easing: "ease-in-out"
-							});
-				
-				
-						};
-					});
-				view.whenLayerView(geojsonlayer9).then(function(layerView) {});
+
 				//----------------------------------三、添加坐标、比例尺显示-----------------------------------
 				//添加DIV用于显示坐标等信息
 				var coordsWidget = document.createElement("div");
@@ -615,7 +632,7 @@
 							layer11 = geojsonlayer5;
 					}
 				})
-				
+
 				const queryOpts1 = document.getElementById("query-type1");
 				distance = 1
 				queryOpts1.addEventListener("change", () => {
@@ -658,7 +675,8 @@
 					geojsonlayer9.queryFeatures(query).then(function(abc) {
 						abc.features.forEach(function(item) {
 
-							const bufferPoly = geometryEngine.geodesicBuffer(item.geometry, distance,
+							const bufferPoly = geometryEngine.geodesicBuffer(item.geometry,
+								distance,
 								'kilometers');
 							var g = new Graphic({
 								geometry: bufferPoly, //item.geometry,
@@ -685,7 +703,7 @@
 							query2.outFields = ["*"];
 
 							layer11.queryFeatureCount(query2).then(function(earthqua) {
-								alert("Layer: " + earthqua)
+								alert("查询到的点数量: " + earthqua)
 							});
 							layer11.queryFeatures(query2).then(function(earthqua) {
 								earthqua.features.forEach(function(eachEq) {
