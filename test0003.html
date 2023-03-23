@@ -1,0 +1,759 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+
+		<title>
+			202031108010003童明东 《GIS开发与应用3》课设
+		</title>
+
+		<style>
+			html,
+			body,
+			#viewDiv {
+				height: 100%;
+				width: 100%;
+				margin: 0;
+				padding: 0;
+			}
+
+			#optionsDiv {
+				background-color: white;
+				color: black;
+				padding: 6px;
+				max-width: 400px;
+				border-radius: 10px;
+			}
+		</style>
+
+		<link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css" />
+		<script src="https://js.arcgis.com/4.25/"></script>
+
+		<script>
+			require([
+				"esri/Map",
+				"esri/views/MapView",
+				"esri/layers/GroupLayer",
+				"esri/layers/MapImageLayer",
+				"esri/layers/FeatureLayer",
+				"esri/widgets/LayerList",
+				"esri/widgets/Slider",
+				"esri/widgets/Legend",
+				"esri/widgets/BasemapGallery",
+				"esri/widgets/Expand",
+				"esri/core/reactiveUtils",
+				"esri/widgets/CoordinateConversion",
+				"esri/layers/GeoJSONLayer",
+				"esri/widgets/Swipe",
+				"esri/widgets/LayerList/ListItemPanel",
+				"esri/renderers/SimpleRenderer",
+				"esri/geometry/geometryEngine",
+				"esri/Graphic",
+				"esri/symbols/SimpleMarkerSymbol",
+				"esri/Color",
+				"esri/symbols/SimpleLineSymbol",
+			], (Map, MapView, GroupLayer, MapImageLayer, FeatureLayer, LayerList, Slider, Legend, BasemapGallery,
+				Expand, reactiveUtils, CoordinateConversion, GeoJSONLayer, Swipe, ListItemPanel, SimpleRenderer,
+				geometryEngine, Graphic, SimpleMarkerSymbol, Color, SimpleLineSymbol) => {
+				// ------------------------------------------一、显示地图图层---------------------------------------
+				const map = new Map({
+					basemap: "streets-vector",
+
+				});
+
+				// Add the map to a MapView
+				const view = new MapView({
+					center: [106.217, 34.8419],
+					zoom: 3,
+					container: "viewDiv",
+					map: map
+				});
+				// --------------------------------------------二、添加地图要素图层--------------------------------------
+				//添加POI的图层
+				const template = {
+					title: "NAME",
+					content: [{
+						// It is also possible to set the fieldInfos outside of the content
+						// directly in the popupTemplate. If no fieldInfos is specifically set
+						// in the content, it defaults to whatever may be set within the popupTemplate.
+						type: "fields",
+						fieldInfos: [{
+								fieldName: "省份",
+								label: "省份"
+							},
+							{
+								fieldName: "城市",
+								label: "城市",
+								format: {
+									digitSeparator: true,
+									places: 0
+								}
+							},
+							{
+								fieldName: "区域",
+								label: "区域",
+								format: {
+									digitSeparator: true,
+									places: 0
+								}
+							},
+							{
+								fieldName: "经度",
+								label: "经度"
+							},
+							{
+								fieldName: "纬度",
+								label: "纬度",
+								format: {
+									digitSeparator: true,
+									places: 0
+								}
+							},
+							{
+								fieldName: "名称",
+								label: "名称",
+								format: {
+									digitSeparator: true,
+									places: 0
+								}
+							},
+							{
+								fieldName: "大类",
+								label: "类型",
+								format: {
+									digitSeparator: true,
+									places: 0
+								}
+							},
+						]
+					}]
+				};
+				const template1 = {
+					title: "NAME",
+					content: [{
+						// It is also possible to set the fieldInfos outside of the content
+						// directly in the popupTemplate. If no fieldInfos is specifically set
+						// in the content, it defaults to whatever may be set within the popupTemplate.
+						type: "fields",
+						fieldInfos: [{
+								fieldName: "name",
+								label: "name"
+							},
+							{
+								fieldName: "adcode",
+								label: "adcode",
+								format: {
+									digitSeparator: true,
+									places: 0
+								}
+							},
+							{
+								fieldName: "center",
+								label: "center",
+								format: {
+									digitSeparator: true,
+									places: 0
+								}
+							},
+						]
+					}]
+				};
+
+				const url1 = "data/肇庆_餐饮美食.json";
+				const url2 = "data/肇庆_购物消费.json";
+				const url3 = "data/肇庆_交通设施.json";
+				const url4 = "data/肇庆_科教文化.json";
+				const url5 = "data/肇庆_休闲娱乐.json";
+				const url6 = "data/肇庆_医疗保健.json";
+				const url7 = "data/肇庆_汽车相关.json";
+				const url8 = "data/肇庆_公司企业.json";
+				const url9 = "data/肇庆市.json";
+
+				// const url1 = "https://tongmingdong.github.io/data/肇庆_餐饮美食.json";
+				// const url2 = "https://tongmingdong.github.io/data/肇庆_购物消费.json";
+				// const url3 = "https://tongmingdong.github.io/data/肇庆_交通设施.json";
+				// const url4 = "https://tongmingdong.github.io/data/肇庆_科教文化.json";
+				// const url5 = "https://tongmingdong.github.io/data/肇庆_休闲娱乐.json";
+				// const url6 = "https://tongmingdong.github.io/data/肇庆_医疗保健.json";
+				// const url7 = "https://tongmingdong.github.io/data/肇庆_汽车相关.json";
+				// const url8 = "https://tongmingdong.github.io/data/肇庆_公司企业.json";
+				// const url9 = "https://tongmingdong.github.io/data/肇庆市.json";
+
+				const renderer1 = {
+					type: "simple",
+					symbol: {
+						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+						size: 6,
+						color: "rgba(255, 170, 0, 0.5)",
+						outline: { // autocasts as new SimpleLineSymbol()
+							width: 0.5,
+							color: "white"
+						}
+					}
+				};
+				const renderer2 = {
+					type: "simple",
+					symbol: {
+						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+						size: 6,
+						color: "yellow",
+						outline: { // autocasts as new SimpleLineSymbol()
+							width: 0.5,
+							color: "white"
+						}
+					}
+				};
+				const renderer3 = {
+					type: "simple",
+					symbol: {
+						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+						size: 6,
+						color: "white",
+						outline: { // autocasts as new SimpleLineSymbol()
+							width: 0.5,
+							color: "white"
+						}
+					}
+				};
+				const renderer4 = {
+					type: "simple",
+					symbol: {
+						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+						size: 6,
+						color: "rgba(255, 173, 101, 0.5)",
+						outline: { // autocasts as new SimpleLineSymbol()
+							width: 0.5,
+							color: "white"
+						}
+					}
+				};
+				const renderer5 = {
+					type: "simple",
+					symbol: {
+						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+						size: 6,
+						color: "blue",
+						outline: { // autocasts as new SimpleLineSymbol()
+							width: 0.5,
+							color: "white"
+						}
+					}
+				};
+				const renderer6 = {
+					type: "simple",
+					symbol: {
+						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+						size: 6,
+						color: "purple",
+						outline: { // autocasts as new SimpleLineSymbol()
+							width: 0.5,
+							color: "white"
+						}
+					}
+				};
+				const renderer7 = {
+					type: "simple",
+					symbol: {
+						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+						style: "square",
+						size: 6,
+						color: "rgba(5, 200, 38, 1.0)",
+						outline: { // autocasts as new SimpleLineSymbol()
+							width: 0.5,
+							color: "white"
+						}
+					}
+				};
+				const renderer8 = {
+					type: "simple",
+					symbol: {
+						type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+						size: 6,
+						color: "rgba(255, 0, 127, 0.5)",
+						outline: { // autocasts as new SimpleLineSymbol()
+							width: 0.5,
+							color: "white"
+						}
+					}
+				};
+
+				const renderer9 = {
+					type: "simple", // autocasts as new SimpleRenderer()
+					symbol: {
+						type: "simple-fill", // autocasts as new SimpleFillSymbol()
+						color: "rgba(64, 158, 255, 0.5)",
+						outline: {
+							// makes the outlines of all features consistently light gray
+							color: "rgba(255, 255, 255, 1.0)",
+							width: 0.5
+						}
+					}
+				};
+
+				const geojsonlayer9 = new GeoJSONLayer({
+					"url": url9,
+					title: "肇庆市行政区",
+					renderer: renderer9,
+					popupTemplate: template1
+				});
+				map.add(geojsonlayer9)
+				reactiveUtils.watch(
+					() => geojsonlayer9.visible,
+					(visible) => {
+						if (visible) {
+							alert(
+								"    肇庆，古称端州，位于广东省中西部，东部和东南部与佛山市接壤，西南与云浮市相连，西及西北与广西壮族自治区梧州市和贺州市交界，北部及东北部与清远市相邻。广东省地级市，截止2020年末肇庆市行政区域总面积148.91万公顷，下辖4个会市，设91个镇、12个街道、1个民族乡、1255个行政村和296个社区常住人口412.97万人（2021年）。肇庆历史悠久，文化底蕴深厚。春秋战国时期为百越地；秦始皇三十三年（公元前214）所设四会县是广东省4 个最早建制县之一；中华人民共和国成立后，肇庆一直是高要县、肇庆市人民政府和肇庆地区行政公署的驻地。1988年3月，肇庆改为省辖。\n    现在的肇庆市在各个行业的发展都十分迅速，有餐饮美食、交通设施、科教文化、休闲娱乐、医疗保健、购物消费以及汽车行业等等。"
+							);
+
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+
+
+						};
+					});
+				view.whenLayerView(geojsonlayer9).then(function(layerView) {});
+
+				const geojsonlayer1 = new GeoJSONLayer({
+					"url": url1,
+					title: "餐饮美食",
+					renderer: renderer1,
+					popupTemplate: template
+				});
+				map.add(geojsonlayer1)
+				reactiveUtils.watch(
+					() => geojsonlayer1.visible,
+					(visible) => {
+						if (visible) {
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8,
+
+							}, {
+								duration: 2500,
+								easing: "ease-in-out",
+
+							});
+						};
+					});
+				view.whenLayerView(geojsonlayer1).then(function(layerView) {});
+
+				const geojsonlayer2 = new GeoJSONLayer({
+					"url": url2,
+					title: "购物消费",
+					renderer: renderer2,
+					popupTemplate: template
+				});
+
+				map.add(geojsonlayer2)
+				reactiveUtils.watch(
+					() => geojsonlayer2.visible,
+					(visible) => {
+						if (visible) {
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+						};
+					});
+				view.whenLayerView(geojsonlayer2).then(function(layerView) {});
+
+				const geojsonlayer3 = new GeoJSONLayer({
+					"url": url3,
+					title: "交通设施",
+					renderer: renderer3,
+					popupTemplate: template
+				});
+				map.add(geojsonlayer3)
+				reactiveUtils.watch(
+					() => geojsonlayer3.visible,
+					(visible) => {
+						if (visible) {
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+						};
+					});
+				view.whenLayerView(geojsonlayer3).then(function(layerView) {});
+
+				const geojsonlayer4 = new GeoJSONLayer({
+					"url": url4,
+					title: "科教文化",
+					renderer: renderer4,
+					popupTemplate: template
+				});
+				map.add(geojsonlayer4)
+				reactiveUtils.watch(
+					() => geojsonlayer4.visible,
+					(visible) => {
+						if (visible) {
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+						};
+					});
+				view.whenLayerView(geojsonlayer4).then(function(layerView) {});
+
+				const geojsonlayer5 = new GeoJSONLayer({
+					"url": url5,
+					title: "休闲娱乐",
+					renderer: renderer5,
+					popupTemplate: template
+				});
+				map.add(geojsonlayer5)
+				reactiveUtils.watch(
+					() => geojsonlayer5.visible,
+					(visible) => {
+						if (visible) {
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+						};
+					});
+				view.whenLayerView(geojsonlayer5).then(function(layerView) {});
+
+				//如果采用单一符号
+				//step1
+				const simpleMS = new SimpleMarkerSymbol({
+					color: "rgba(200, 118, 147, 1.0)",
+					size: 7,
+					style: "triangle",
+					outline: new SimpleLineSymbol({
+						color: new Color([255, 255, 255]),
+						width: 0
+					})
+				});
+				//step2
+				const simpleR = new SimpleRenderer({
+					symbol: simpleMS
+				});
+				//step3
+				geojsonlayer5.renderer = simpleR;
+
+				const geojsonlayer6 = new GeoJSONLayer({
+					"url": url6,
+					title: "医疗保健",
+					renderer: renderer6,
+					popupTemplate: template
+				});
+
+				map.add(geojsonlayer6)
+				reactiveUtils.watch(
+					() => geojsonlayer6.visible,
+					(visible) => {
+						if (visible) {
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+						};
+					});
+				view.whenLayerView(geojsonlayer6).then(function(layerView) {});
+
+				const geojsonlayer7 = new GeoJSONLayer({
+					"url": url7,
+					title: "汽车相关",
+					renderer: renderer7,
+					popupTemplate: template
+				});
+				map.add(geojsonlayer7)
+				reactiveUtils.watch(
+					() => geojsonlayer7.visible,
+					(visible) => {
+						if (visible) {
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+						};
+					});
+				view.whenLayerView(geojsonlayer7).then(function(layerView) {});
+
+				const geojsonlayer8 = new GeoJSONLayer({
+					"url": url8,
+					title: "公司企业",
+					renderer: renderer8,
+					popupTemplate: template
+				});
+
+				map.add(geojsonlayer8)
+				reactiveUtils.watch(
+					() => geojsonlayer8.visible,
+					(visible) => {
+						if (visible) {
+							view.goTo({
+								target: [112.2479, 23.4552],
+								zoom: 8
+							}, {
+								duration: 2500,
+								easing: "ease-in-out"
+							});
+						};
+					});
+				view.whenLayerView(geojsonlayer8).then(function(layerView) {});
+
+
+				//----------------------------------三、添加坐标、比例尺显示-----------------------------------
+				//添加DIV用于显示坐标等信息
+				var coordsWidget = document.createElement("div");
+				coordsWidget.id = "coordsWidget";
+				coordsWidget.className = "esri-widget esri-component";
+				coordsWidget.style.padding = "7px 15px 5px";
+				view.ui.add(coordsWidget, "bottom-right");
+
+				//显示经纬度、比例尺大小和尺度
+				function showCoordinates(pt) {
+					var coords = "Lat/Lon " + pt.latitude.toFixed(3) + " " + pt.longitude.toFixed(3) +
+						" | Scale 1:" + Math.round(view.scale * 1) / 1;
+					coordsWidget.innerHTML = coords;
+				}
+				//添加事件显示中心的坐标（在视图停止移动之后）
+				view.watch(["stationary"], function() {
+					showCoordinates(view.center);
+				});
+
+				//添加显示鼠标的坐标点
+				view.on(["pointer-down", "pointer-move"], function(evt) {
+					showCoordinates(view.toMap({
+						x: evt.x,
+						y: evt.y
+					}));
+				});
+				//------------------------------------------四、提供坐标转换功能-------------------------------------
+				const ccWidget = new CoordinateConversion({
+					view: view,
+				});
+				view.ui.add(ccWidget, "top-right");
+
+				// Regular expression to find a number
+				const numberSearchPattern = /-?\d+[\.]?\d*/;
+
+				//----------------------------------------------五、显示图例--------------------------------------
+				const rrExpand = new Expand({
+					view,
+					content: new Legend({
+						view
+					}),
+					expanded: false
+				});
+				view.ui.add(rrExpand, "bottom-left")
+
+				//---------------------------------六、显示BasemapGallery(小图标，菜单栏形式)-----------------------------------
+				const bgExpand = new Expand({
+					view,
+					content: new BasemapGallery({
+						view
+					}),
+				});
+				view.ui.add(bgExpand, "top-left");
+
+				//-----------------------------------七、create a new Swipe widget-------------------------------------
+				const swipe = new Swipe({
+					leadingLayers: [geojsonlayer9],
+					position: 35, // set position of widget to 35%
+					view: view
+				});
+
+				// add the widget to the view
+				view.ui.add(swipe);
+
+				view.ui.add("optionsDiv", "top-right");
+				//--------------------------------------八、显示layerlist--------------------------------------
+				const layerList = new LayerList({
+					view: view,
+				});
+				const llExpand = new Expand({
+					view: view,
+					content: layerList,
+					expanded: false
+				});
+				// Add widget to the top right corner of the view
+				view.ui.add(llExpand, "top-right");
+				//-----------------------------------九、缓冲区查询——————以休闲娱乐为例--------------------------------------
+				//鼠标右键点击某个省后，以“该省多边形边界任意缓冲区”为几何查询条件查询地震图层，并高亮满足条件的地震点要素
+				//选择查询的poi点数据
+				const queryOpts = document.getElementById("query-type");
+				layer11 = geojsonlayer5;
+				queryOpts.addEventListener("change", () => {
+					console.log(queryOpts.value)
+					switch (queryOpts.value) {
+						// values set for distance query
+						case "geojsonlayer1":
+							layer11 = geojsonlayer1;
+							break;
+						case "geojsonlayer2":
+							layer11 = geojsonlayer2;
+							break;
+						case "geojsonlayer3":
+							layer11 = geojsonlayer3;
+							break;
+						case "geojsonlayer4":
+							layer11 = geojsonlayer4;
+							break;
+						case "geojsonlayer5":
+							layer11 = geojsonlayer5;
+							break;
+						case "geojsonlayer6":
+							layer11 = geojsonlayer6;
+							break;
+						case "geojsonlayer7":
+							layer11 = geojsonlayer7;
+							break;
+						case "geojsonlayer8":
+							layer11 = geojsonlayer8;
+							break;
+						default:
+							// Default set to basic query
+							layer11 = geojsonlayer5;
+					}
+				})
+
+				const queryOpts1 = document.getElementById("query-type1");
+				distance = 1
+				queryOpts1.addEventListener("change", () => {
+					console.log(queryOpts1.value)
+					switch (queryOpts1.value) {
+						// values set for distance query
+						case "0.5km":
+							distance = 0.5;
+							break;
+						case "1km":
+							distance = 1;
+							break;
+						case "2km":
+							distance = 2;
+							break;
+						case "5km":
+							distance = 5;
+							break;
+						case "10km":
+							distance = 10;
+							break;
+						default:
+							distance = 1;
+					}
+				})
+
+				view.on("click", function(evt) {
+					view.graphics.removeAll();
+					if (evt.button != 2) return;
+					let query = geojsonlayer9.createQuery();
+					query.geometry = view.toMap(evt); // the point location of the pointer
+					query.distance = 0.1;
+					query.units = "miles";
+					query.spatialRelationship = "intersects"; // this is the default
+					query.returnGeometry = true;
+					query.outFields = ["*"];
+					//query.where = "mag > 3";
+
+					//geojsonlayer.queryFeatureCount(query).then(function (abc) { alert("Layer: "+abc) });
+					geojsonlayer9.queryFeatures(query).then(function(abc) {
+						abc.features.forEach(function(item) {
+
+							const bufferPoly = geometryEngine.geodesicBuffer(item.geometry,
+								distance,
+								'kilometers');
+							var g = new Graphic({
+								geometry: bufferPoly, //item.geometry,
+								attributes: item.attributes,
+								symbol: {
+									type: "simple-fill",
+									color: [200, 100, 100, 0.3]
+									//size: 3,//item.attributes['magnitude'] * item.attributes['magnitude'],
+									//style: "square"
+
+								}
+							});
+							view.graphics.add(g);
+							const area = geometryEngine.geodesicArea(item.geometry,
+								"square-kilometers");
+
+
+
+							let query2 = layer11.createQuery();
+							query2.geometry = bufferPoly;
+
+							query2.spatialRelationship = "intersects"; // this is the default
+							query2.returnGeometry = true;
+							query2.outFields = ["*"];
+
+							layer11.queryFeatureCount(query2).then(function(earthqua) {
+								alert("查询到的点数量: " + earthqua)
+							});
+							layer11.queryFeatures(query2).then(function(earthqua) {
+								earthqua.features.forEach(function(eachEq) {
+									var g = new Graphic({
+										geometry: eachEq.geometry,
+										attributes: eachEq.attributes,
+										symbol: {
+											type: "simple-marker",
+											color: [200, 0, 0, 0.3]
+										}
+									});
+
+									view.graphics.add(g);
+								});
+
+							});
+
+						});
+
+					});
+
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<div id="viewDiv"></div>
+		<div id="optionsDiv" class="esri-widget">
+			<p>
+				[具有缓冲区查询功能]：<br> 鼠标右键点击肇庆市内某个县后，会以“该县多边形边界任意km缓冲区”为几何查询条件查询[任意]图层，并高亮满足条件的[任意]的点数据。可以从以下的数据中选择。</br>
+			</p>
+			<select id="query-type" class="esri-widget">
+				<option value="geojsonlayer1">餐饮美食</option>
+				<option value="geojsonlayer2">购物消费</option>
+				<option value="geojsonlayer3">交通设施</option>
+				<option value="geojsonlayer4">科教文化</option>
+				<option value="geojsonlayer5">休闲娱乐</option>
+				<option value="geojsonlayer6">医疗保健</option>
+				<option value="geojsonlayer7">汽车相关</option>
+				<option value="geojsonlayer8">公司企业</option>
+			</select>
+			<select id="query-type1" class="esri-widget">
+				<option value="0.5km">0.5km</option>
+				<option value="1km">1km</option>
+				<option value="2km">2km</option>
+				<option value="5km">5km</option>
+				<option value="10km">10km</option>
+			</select>
+		</div>
+
+	</body>
+</html>
